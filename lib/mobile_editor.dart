@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class MobileEditor extends StatefulWidget {
   const MobileEditor({
-    required this.editorState,
     super.key,
+    required this.editorState,
     this.editorStyle,
   });
 
@@ -30,6 +30,7 @@ class _MobileEditorState extends State<MobileEditor> {
 
     editorScrollController = EditorScrollController(
       editorState: editorState,
+      shrinkWrap: false,
     );
 
     editorStyle = _buildMobileEditorStyle();
@@ -49,7 +50,7 @@ class _MobileEditorState extends State<MobileEditor> {
     assert(PlatformExtension.isMobile);
     return MobileToolbarV2(
       toolbarHeight: 48.0,
-      toolbarItems: <MobileToolbarItem>[
+      toolbarItems: [
         textDecorationMobileToolbarItemV2,
         buildTextAndBackgroundColorMobileToolbarItem(),
         blocksMobileToolbarItem,
@@ -58,14 +59,13 @@ class _MobileEditorState extends State<MobileEditor> {
       ],
       editorState: editorState,
       child: Column(
-        children: <Widget>[
+        children: [
           // build appflowy editor
           Expanded(
             child: MobileFloatingToolbar(
               editorState: editorState,
               editorScrollController: editorScrollController,
-              toolbarBuilder:
-                  (BuildContext context, Offset anchor, Function closeToolbar) {
+              toolbarBuilder: (context, anchor, closeToolbar) {
                 return AdaptiveTextSelectionToolbar.editable(
                   clipboardStatus: ClipboardStatus.pasteable,
                   onCopy: () {
@@ -89,6 +89,7 @@ class _MobileEditorState extends State<MobileEditor> {
                 editorState: editorState,
                 editorScrollController: editorScrollController,
                 blockComponentBuilders: blockComponentBuilders,
+                showMagnifier: true,
                 // showcase 3: customize the header and footer.
                 header: Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),
@@ -122,17 +123,18 @@ class _MobileEditorState extends State<MobileEditor> {
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      magnifierSize: const Size(144, 96),
+      mobileDragHandleBallSize: const Size(12, 12),
     );
   }
 
   // showcase 2: customize the block style
   Map<String, BlockComponentBuilder> _buildBlockComponentBuilders() {
-    final Map<String, BlockComponentBuilder> map =
-        <String, BlockComponentBuilder>{
+    final map = {
       ...standardBlockComponentBuilderMap,
     };
     // customize the heading block component
-    final List<double> levelToFontSize = <double>[
+    final levelToFontSize = [
       24.0,
       22.0,
       20.0,
@@ -141,14 +143,14 @@ class _MobileEditorState extends State<MobileEditor> {
       14.0,
     ];
     map[HeadingBlockKeys.type] = HeadingBlockComponentBuilder(
-      textStyleBuilder: (int level) => GoogleFonts.poppins(
+      textStyleBuilder: (level) => GoogleFonts.poppins(
         fontSize: levelToFontSize.elementAtOrNull(level - 1) ?? 14.0,
         fontWeight: FontWeight.w600,
       ),
     );
     map[ParagraphBlockKeys.type] = ParagraphBlockComponentBuilder(
       configuration: BlockComponentConfiguration(
-        placeholderText: (Node node) => 'Type something...',
+        placeholderText: (node) => 'Type something...',
       ),
     );
     return map;

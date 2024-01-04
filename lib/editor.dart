@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 
 class Editor extends StatefulWidget {
   const Editor({
+    super.key,
     required this.jsonString,
     required this.onEditorStateChange,
-    super.key,
     this.editorStyle,
     this.textDirection = TextDirection.ltr,
   });
@@ -39,19 +39,21 @@ class _EditorState extends State<Editor> {
       color: Colors.white,
       child: FutureBuilder<String>(
         future: widget.jsonString,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        builder: (context, snapshot) {
           if (snapshot.hasData &&
               snapshot.connectionState == ConnectionState.done) {
             EditorState editorState = EditorState(
               document: Document.fromJson(
-                  json.decode(snapshot.data!) as Map<String, dynamic>),
+                Map<String, Object>.from(
+                  json.decode(snapshot.data!),
+                ),
+              ),
             );
             editorState.logConfiguration
               ..handler = debugPrint
               ..level = LogLevel.off;
 
-            editorState.transactionStream
-                .listen(((TransactionTime, Transaction) event) {
+            editorState.transactionStream.listen((event) {
               if (event.$1 == TransactionTime.after) {
                 widget.onEditorStateChange(editorState);
               }

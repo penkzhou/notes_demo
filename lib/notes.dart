@@ -15,11 +15,39 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
-  late EditorState _editorState;
-  Future<String> jsonString = Future<String>.value('');
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<String> getJsonString() {
-    return rootBundle.loadString('assets/mobile_example.json');
+  late WidgetBuilder _widgetBuilder;
+  late EditorState _editorState;
+  late Future<String> _jsonString;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _jsonString = rootBundle.loadString('assets/mobile_example.json');
+
+    _widgetBuilder = (context) => Editor(
+          jsonString: _jsonString,
+          onEditorStateChange: (editorState) {
+            _editorState = editorState;
+          },
+        );
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+
+    _widgetBuilder = (context) => Editor(
+          jsonString: _jsonString,
+          onEditorStateChange: (editorState) {
+            _editorState = editorState;
+            _jsonString = Future.value(
+              jsonEncode(_editorState.document.toJson()),
+            );
+          },
+        );
   }
 
   @override
@@ -28,15 +56,6 @@ class _NotesPageState extends State<NotesPage> {
         appBar: AppBar(
           title: const Text('Notes'),
         ),
-        body: Editor(
-          jsonString: getJsonString(),
-          onEditorStateChange: (EditorState editorState) {
-            _editorState = editorState;
-            setState(() {
-              jsonString = Future<String>.value(
-                  jsonEncode(_editorState.document.toJson()));
-            });
-          },
-        ));
+        body: _widgetBuilder(context));
   }
 }
